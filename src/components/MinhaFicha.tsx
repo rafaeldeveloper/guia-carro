@@ -6,6 +6,7 @@ import { buscarCarro, carros, type Carro } from "@/data/carros";
 import { dadosFicha, LINKS_RECALL } from "@/data/fichaCarros";
 import { precosMercado } from "@/data/precoMercado";
 import { nivelRisco } from "@/lib/apresentacao";
+import { buscarFipe, type RespostaFipe } from "@/lib/fipe";
 import {
   depreciacao,
   garantiaRestante,
@@ -253,27 +254,21 @@ function Linha({ rotulo, children }: { rotulo: string; children: React.ReactNode
   );
 }
 
-type RespostaFipe =
-  | { valor: number; anoModelo: number; mesReferencia: string; codigo: string; modelo: string | null; origem: "api" | "salvo"; aviso?: string }
-  | { erro: string };
-
 function ValorHoje({ ficha, hoje }: { ficha: CarroDoUsuario; hoje: string }) {
-  const url = ficha.carroId ? `/api/ficha/fipe?carro=${encodeURIComponent(ficha.carroId)}&ano=${ficha.anoModelo}` : null;
-  const [resposta, setResposta] = useState<{ url: string; dados: RespostaFipe } | null>(null);
+  const chave = ficha.carroId ? `${ficha.carroId}:${ficha.anoModelo}` : null;
+  const [resposta, setResposta] = useState<{ chave: string; dados: RespostaFipe } | null>(null);
 
+  const { carroId, anoModelo } = ficha;
   useEffect(() => {
-    if (!url) return;
+    if (!carroId) return;
     let ativo = true;
-    fetch(url)
-      .then((r) => r.json() as Promise<RespostaFipe>)
-      .catch((): RespostaFipe => ({ erro: "Sem conexão com o servidor para buscar a FIPE." }))
-      .then((dados) => ativo && setResposta({ url, dados }));
+    buscarFipe(carroId, anoModelo).then((dados) => ativo && setResposta({ chave: `${carroId}:${anoModelo}`, dados }));
     return () => {
       ativo = false;
     };
-  }, [url]);
+  }, [carroId, anoModelo]);
 
-  if (!url)
+  if (!chave)
     return (
       <Cartao titulo="Valor hoje">
         <p className="text-sm text-muted">
@@ -289,7 +284,7 @@ function ValorHoje({ ficha, hoje }: { ficha: CarroDoUsuario; hoje: string }) {
       </Cartao>
     );
 
-  const dados = resposta?.url === url ? resposta.dados : null;
+  const dados = resposta?.chave === chave ? resposta.dados : null;
   const anuncios = ficha.carroId ? precosMercado[ficha.carroId]?.anuncios : null;
   const fipeSalva = ficha.carroId ? precosMercado[ficha.carroId]?.fipe : null;
   const d = dados && "valor" in dados ? depreciacao(ficha.precoPago, dados.valor, ficha.dataCompra, hoje) : null;

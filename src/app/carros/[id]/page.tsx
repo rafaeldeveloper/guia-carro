@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FotoCarro } from "@/components/FotoCarro";
 import { NaoLevantado } from "@/components/NaoLevantado";
 import { PrecoJusto } from "@/components/PrecoJusto";
 import { IconeAlerta, IconeRisco, ReguaRisco, corTextoNivel } from "@/components/NotaRiscoSelo";
 import { buscarCarro, carros, type Carro } from "@/data/carros";
+import { fotos } from "@/data/fotos";
 import {
   comparacaoComMedia,
   dataMaisRecente,
@@ -16,8 +18,6 @@ import {
 import { formatarMilReais, formatarNota, formatarNumero, formatarReais } from "@/lib/formato";
 import { avaliarPreco, calcularFaixa, rotuloVeredito, type Veredito } from "@/lib/precoJusto";
 import { calcularRisco, faixaRisco, nomeSistema, sistemas } from "@/lib/risco";
-
-export const revalidate = 86400;
 
 const rotuloConfianca = { alta: "alta", media: "média", baixa: "baixa" };
 
@@ -127,6 +127,7 @@ export default async function PaginaCarro({ params }: { params: Promise<{ id: st
   const somaPontos = sistemas.reduce((t, s) => t + risco.sistemas[s].pontos, 0) + risco.posVenda;
   const faixa = calcularFaixa(carro, new Date().toLocaleDateString("sv-SE", { timeZone: "America/Fortaleza" }));
   const avaliacao = faixa ? avaliarPreco(faixa, carro.preco) : null;
+  const credito = carro.foto ? fotos[carro.id] : undefined;
 
   return (
     <main className="conteudo grid gap-8 py-6 md:py-8">
@@ -142,6 +143,22 @@ export default async function PaginaCarro({ params }: { params: Promise<{ id: st
             {carro.tipo} · {carro.motor} · {carro.potenciaCv} cv · {carro.cambio}
           </p>
         </header>
+        {credito && (
+          <figure className="grid max-w-3xl gap-1.5">
+            <FotoCarro id={carro.id} tipo={carro.tipo} foto={carro.foto} grande className="aspect-[16/10] rounded-xl" />
+            <figcaption className="text-sm text-muted">
+              Foto:{" "}
+              <a href={credito.urlOrigem} className="link text-muted">
+                {credito.autor}
+              </a>
+              ,{" "}
+              <a href={credito.urlLicenca} className="link text-muted" rel="license">
+                {credito.licenca}
+              </a>
+              , via Wikimedia Commons. {credito.observacao}.
+            </figcaption>
+          </figure>
+        )}
       </div>
 
       <div className="grid gap-6 border-y border-line py-6 md:grid-cols-[1.2fr_1fr_1fr] md:gap-10">

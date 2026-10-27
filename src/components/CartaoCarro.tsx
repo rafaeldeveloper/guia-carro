@@ -23,12 +23,12 @@ export function CartaoCarro({
       className="group grid content-start overflow-hidden rounded-xl bg-bg shadow-[0_0_0_1px_var(--border),0_1px_3px_rgb(20_23_26/0.08)] hover:shadow-[0_0_0_1px_var(--border-strong),0_2px_6px_rgb(20_23_26/0.12)]"
     >
       <div className="relative">
-        <FotoCarro tipo={c.tipo} foto={c.foto} className="aspect-[16/10]" />
+        <FotoCarro id={c.id} tipo={c.tipo} foto={c.foto} className="aspect-[16/10]" />
         <span className="absolute top-2.5 left-2.5 rounded-md bg-bg px-2 py-0.5 text-sm shadow-sm">
           <NotaForma nota={c.nota} incerto={c.incerto} />
         </span>
         {posicao && (
-          <span className="absolute top-2 right-3 text-xl font-extrabold">
+          <span className="absolute top-2.5 right-2.5 rounded-md bg-bg px-2 text-lg font-extrabold shadow-sm">
             {posicao}º<span className="sr-only"> lugar</span>
           </span>
         )}

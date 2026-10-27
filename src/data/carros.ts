@@ -1,3 +1,4 @@
+import { fotos } from "@/data/fotos";
 import type { PrecoMercado } from "@/data/precoMercado";
 import { lote1 } from "./lotes/lote-1";
 import { lote2 } from "./lotes/lote-2";
@@ -240,7 +241,10 @@ const finalistas: Carro[] = [
   },
 ];
 
-export const carros: Carro[] = [...finalistas, ...lote1, ...lote2, ...lote3, ...lote4];
+export const carros: Carro[] = [...finalistas, ...lote1, ...lote2, ...lote3, ...lote4].map((c) => ({
+  ...c,
+  foto: fotos[c.id]?.arquivo,
+}));
 
 export function buscarCarro(id: string) {
   return carros.find((c) => c.id === id);

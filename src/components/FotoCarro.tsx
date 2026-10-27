@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Carro } from "@/data/carros";
+import { fotos } from "@/data/fotos";
 
 type Silhueta = { corpo: string; vidro: string; rodas: [number, number]; raio: number; cy: number; extra?: string };
 
@@ -36,18 +37,33 @@ const silhuetas: Record<Carro["tipo"], Silhueta> = {
 };
 
 export function FotoCarro({
+  id,
   tipo,
   foto,
+  grande = false,
   className = "",
 }: {
+  id: string;
   tipo: Carro["tipo"];
   foto?: string;
+  grande?: boolean;
   className?: string;
 }) {
-  if (foto) {
+  const credito = fotos[id];
+  if (foto && credito) {
     return (
-      <div className={`relative overflow-hidden bg-foto ${className}`}>
-        <Image src={foto} alt="" fill unoptimized sizes="(min-width: 48rem) 25vw, 100vw" className="object-cover" />
+      <div
+        className={`relative overflow-hidden bg-foto ${className}`}
+        title={grande ? undefined : `Foto: ${credito.autor}, ${credito.licenca}`}
+      >
+        <Image
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH}${grande ? foto : credito.thumb}`}
+          alt={credito.alt}
+          fill
+          unoptimized
+          sizes={grande ? "(min-width: 48rem) 48rem, 100vw" : "(min-width: 48rem) 25vw, 100vw"}
+          className={grande ? "object-contain" : "object-cover"}
+        />
       </div>
     );
   }

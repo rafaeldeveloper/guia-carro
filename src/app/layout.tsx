@@ -48,6 +48,16 @@ export default function RootLayout({
           </div>
         </header>
         {children}
+        <footer className="border-t border-line">
+          <div className="conteudo flex flex-wrap gap-x-6 gap-y-1 py-4 text-sm text-muted">
+            <Link href="/como-calculamos" className="hover:text-ink">
+              Como calculamos
+            </Link>
+            <Link href="/creditos" className="hover:text-ink">
+              Créditos das fotos
+            </Link>
+          </div>
+        </footer>
       </body>
     </html>
   );

@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guia do Carro
 
-## Getting Started
+Compara carros 0 km pela nota de risco (reclamações por 1.000 vendidos), mostra o preço justo de cada um, calcula o juro escondido numa proposta de financiamento e acompanha o carro que você comprou (FIPE, revisão, garantia). Os dados da ficha ficam só no navegador.
 
-First, run the development server:
+Site público: https://rafaeldeveloper.github.io/guia-carro/
+
+## Rodar local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev        # http://localhost:3000
+npm test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A leitura da proposta por foto (`/api/proposta/extrair`) usa o Claude Agent SDK e só funciona na versão local, com o Claude Code instalado e logado na máquina (`claude` → `/login`). Sem isso, o app avisa e o formulário manual continua funcionando.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Publicação no GitHub Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+O workflow `.github/workflows/pages.yml` roda a cada push no `main` e uma vez por dia (para atualizar datas e promoções): `npm ci`, `npm test`, `npm run build` com `GITHUB_PAGES=true` e publica a pasta `out/`.
 
-## Learn More
+Com `GITHUB_PAGES=true` o Next gera um site estático (`output: "export"`) em `/guia-carro`:
 
-To learn more about Next.js, take a look at the following resources:
+- a rota de leitura por foto fica fora do build e os botões de foto somem da página de proposta;
+- a FIPE da Minha ficha é buscada direto do navegador em fipe.parallelum.com.br, com cache de 24 h;
+- o preço justo da página de cada carro usa a data do build.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Para testar o build estático: `GITHUB_PAGES=true npm run build` e sirva `out/` sob o caminho `/guia-carro/`.

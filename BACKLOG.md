@@ -6,7 +6,10 @@
 - [ ] Ampliar a base além dos 4 finalistas (SUVs até R$ 150 mil, depois top 30)
 - [x] Layout com base no benchmark: identidade visual, régua de risco, filtros em folha inferior no mobile, detalhe por sistema
 - [x] Relayout (2026-10-27): página inicial com busca, sugestões guiadas e vitrines; /comparar com régua comum; grafite com amarelo só na marca e no botão principal; Inter; largura única de 1180px; faixa de 3 números na página do carro
-- [ ] Fotos licenciadas dos carros (fonte com licença de uso, crédito e data); até lá os cards usam a ilustração por tipo (`FotoCarro`) e o campo `foto` do carro fica vazio
+- [x] Fotos da Wikimedia Commons (2026-10-27): uma foto por carro (28 de 28) com licença CC BY ou CC BY-SA, crédito na página do carro e em /creditos (`src/data/fotos.ts`); só redimensionadas para WebP, sem corte
+  - Modelos sem foto: nenhum; a ilustração por tipo continua como reserva
+  - Fotos de outra versão ou mercado (mesma geração): Avenger, Strada, Creta, Kicks, HR-V, City e Basalt entre outros; Onix hatch é anterior à reestilização de 2025 (trocar quando houver foto do 2025 na Commons)
+- [ ] Pedir às montadoras fotos de imprensa com autorização de uso (versão exata vendida no Brasil)
 - [ ] Comparação lado a lado (até 3 carros no desktop, 2 no mobile; cabeçalho fixo, "só diferenças", melhor valor de cada linha destacado)
 - [ ] Veredito no topo do detalhe: resumo em 1 frase + "o que é bom" / "o que preocupa" (3 itens cada)
 

@@ -47,7 +47,7 @@ describe("interpretarResposta", () => {
 
 describe("POST /api/proposta/extrair", () => {
   const enviar = async (arquivo?: File) => {
-    const { POST } = await import("@/app/api/proposta/extrair/route");
+    const { POST } = await import("@/app/api/proposta/extrair/route.server");
     const corpo = new FormData();
     if (arquivo) corpo.set("imagem", arquivo);
     return POST(new Request("http://localhost/api/proposta/extrair", { method: "POST", body: corpo }));

@@ -378,7 +378,7 @@ function LinhaCarro({ carro: c, posicao, filtros }: { carro: CarroBusca; posicao
       className={`${grade} group grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-b border-line py-3`}
     >
       <span className="hidden text-right text-sm font-semibold text-muted md:block">{posicao}</span>
-      <FotoCarro tipo={c.tipo} foto={c.foto} className="row-span-2 aspect-[16/10] rounded-md md:row-span-1" />
+      <FotoCarro id={c.id} tipo={c.tipo} foto={c.foto} className="row-span-2 aspect-[16/10] rounded-md md:row-span-1" />
       <div className="min-w-0">
         <h3 className="font-semibold leading-snug group-hover:underline">
           {c.nome} <span className="font-normal text-muted">{c.anoModelo}</span>

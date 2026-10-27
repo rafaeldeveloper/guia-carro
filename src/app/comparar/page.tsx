@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { Busca } from "@/components/Busca";
+import { BuscaDaUrl } from "@/components/BuscaDaUrl";
 import { Topo } from "@/components/Topo";
 import { carros } from "@/data/carros";
 import { temIncerteza } from "@/lib/apresentacao";
@@ -6,12 +8,7 @@ import { calcularRisco } from "@/lib/risco";
 
 export const metadata = { title: "Comparar · Guia do Carro" };
 
-export default async function Comparar({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const parametros = await searchParams;
+export default function Comparar() {
   const carrosComNota = carros.map((c) => ({ ...c, nota: calcularRisco(c).nota, incerto: temIncerteza(c) }));
 
   return (
@@ -19,7 +16,9 @@ export default async function Comparar({
       <Topo titulo="Comparar carros">
         Os {carros.length} carros da lista pela nota de risco; filtre por tipo, orçamento, vão livre e equipamentos.
       </Topo>
-      <Busca key={JSON.stringify(parametros)} carros={carrosComNota} parametros={parametros} />
+      <Suspense fallback={<Busca carros={carrosComNota} />}>
+        <BuscaDaUrl carros={carrosComNota} />
+      </Suspense>
     </main>
   );
 }

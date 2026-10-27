@@ -55,6 +55,7 @@ function lerNumero(texto: string) {
 
 const umDecimal = (n: number | null) => (n === null ? "" : String(n).replace(".", ","));
 const centavos = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const LEITURA_FOTO = process.env.NEXT_PUBLIC_LEITURA_FOTO !== "false";
 const pct = (taxa: number) => `${(taxa * 100).toFixed(2).replace(".", ",")}%`;
 
 async function reduzirFoto(arquivo: File): Promise<Blob> {
@@ -140,37 +141,43 @@ export function AnaliseDeProposta() {
 
   return (
     <div className="grid gap-6">
-      <section className="grid gap-3" aria-labelledby="titulo-foto">
-        <h2 id="titulo-foto" className="font-semibold">
-          1. Foto da proposta
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <label className="cursor-pointer rounded-md bg-ink px-4 py-2 text-sm font-medium text-bg">
-            Tirar foto
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="sr-only"
-              onChange={(e) => lerFoto(e.target.files?.[0])}
-            />
-          </label>
-          <label className="cursor-pointer rounded-md border border-line-forte px-4 py-2 text-sm font-medium">
-            Escolher imagem
-            <input type="file" accept="image/*" className="sr-only" onChange={(e) => lerFoto(e.target.files?.[0])} />
-          </label>
-        </div>
-        <p className="text-xs text-muted">
-          A foto vai para o servidor só para ler os valores e é descartada em seguida: não guardamos a imagem nem o
-          conteúdo. A leitura ignora nome, CPF, endereço, telefone, e-mail, placa e chassi. Se preferir, cubra esses
-          dados antes de fotografar ou preencha à mão.
+      {LEITURA_FOTO ? (
+        <section className="grid gap-3" aria-labelledby="titulo-foto">
+          <h2 id="titulo-foto" className="font-semibold">
+            1. Foto da proposta
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <label className="cursor-pointer rounded-md bg-ink px-4 py-2 text-sm font-medium text-bg">
+              Tirar foto
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => lerFoto(e.target.files?.[0])}
+              />
+            </label>
+            <label className="cursor-pointer rounded-md border border-line-forte px-4 py-2 text-sm font-medium">
+              Escolher imagem
+              <input type="file" accept="image/*" className="sr-only" onChange={(e) => lerFoto(e.target.files?.[0])} />
+            </label>
+          </div>
+          <p className="text-xs text-muted">
+            A foto vai para o servidor só para ler os valores e é descartada em seguida: não guardamos a imagem nem o
+            conteúdo. A leitura ignora nome, CPF, endereço, telefone, e-mail, placa e chassi. Se preferir, cubra esses
+            dados antes de fotografar ou preencha à mão.
+          </p>
+          <div aria-live="polite" className="text-sm">
+            {leitura.estado === "lendo" && <p className="text-muted">Lendo a proposta…</p>}
+            {leitura.estado === "erro" && <p className="text-nivel-3">{leitura.mensagem}</p>}
+            {leitura.estado === "lido" && <ResumoLeitura dados={leitura.dados} />}
+          </div>
+        </section>
+      ) : (
+        <p className="text-sm text-muted">
+          A leitura da proposta por foto só funciona na versão local do app; aqui, preencha os valores à mão.
         </p>
-        <div aria-live="polite" className="text-sm">
-          {leitura.estado === "lendo" && <p className="text-muted">Lendo a proposta…</p>}
-          {leitura.estado === "erro" && <p className="text-nivel-3">{leitura.mensagem}</p>}
-          {leitura.estado === "lido" && <ResumoLeitura dados={leitura.dados} />}
-        </div>
-      </section>
+      )}
 
       <form
         onSubmit={calcular}
@@ -179,7 +186,7 @@ export function AnaliseDeProposta() {
         noValidate
       >
         <h2 id="titulo-form" className="font-semibold">
-          2. Confira os valores
+          {LEITURA_FOTO ? "2. Confira os valores" : "Valores da proposta"}
         </h2>
         <div className="grid grid-cols-2 gap-3">
           {rotulos.map(({ campo, rotulo, dica, opcional }) => (

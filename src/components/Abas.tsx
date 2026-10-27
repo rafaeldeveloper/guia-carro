@@ -11,7 +11,7 @@ const abas = [
 ];
 
 export function Abas() {
-  const caminho = usePathname();
+  const caminho = usePathname().replace(/(.)\/$/, "$1");
   const atual = (href: string) =>
     href === "/" ? caminho === "/" : caminho === href || (href === "/comparar" && caminho.startsWith("/carros/"));
 
