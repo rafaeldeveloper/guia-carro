@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+:root,
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f2f3f5;
+  --border: #e3e5e8;
+  --border-strong: #80878f;
+  --text: #14171a;
+  --text-muted: #5f666d;
+  --brand: #14171a;
+  --brand-contrast: #ffffff;
+  --accent: #ffc629;
+  --accent-ink: #14171a;
+  --hero: #14171a;
+  --hero-text: #ffffff;
+  --hero-muted: #c3c9cf;
+  --hero-line: #6b737b;
+  --campo: #ffffff;
+  --foto: #eef0f2;
+  --carro-corpo: #c3cad2;
+  --carro-traco: #6f7780;
+  --carro-vidro: #f7f8f9;
+  --carro-roda: #3b4148;
+  --carro-aro: #aab1b8;
+  --nivel-1: #1e5ba1;
+  --nivel-2: #4d6074;
+  --nivel-3: #924a03;
+  --nivel-4: #a51d2b;
+  --nivel-bg-1: #ddebfe;
+  --nivel-bg-2: #eaf1f8;
+  --nivel-bg-3: #ffe4cc;
+  --nivel-bg-4: #fedddb;
+  --nivel-faixa-1: #2063b0;
+  --nivel-faixa-2: #74889e;
+  --nivel-faixa-3: #ce7305;
+  --nivel-faixa-4: #a8212e;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #16191c;
+  --surface: #1e2226;
+  --surface-2: #262b30;
+  --border: #30363c;
+  --border-strong: #737b84;
+  --text: #eceef0;
+  --text-muted: #a3abb3;
+  --brand: #eceef0;
+  --brand-contrast: #16191c;
+  --accent: #ffc629;
+  --accent-ink: #14171a;
+  --hero: #0c0e10;
+  --hero-text: #ffffff;
+  --hero-muted: #c3c9cf;
+  --hero-line: #6b737b;
+  --campo: #1e2226;
+  --foto: #262b30;
+  --carro-corpo: #59626b;
+  --carro-traco: #9aa3ab;
+  --carro-vidro: #3a4148;
+  --carro-roda: #0f1113;
+  --carro-aro: #8a929a;
+  --nivel-1: #92c1fd;
+  --nivel-2: #b6c6d7;
+  --nivel-3: #fdb171;
+  --nivel-4: #fb9795;
+  --nivel-bg-1: #183356;
+  --nivel-bg-2: #262c33;
+  --nivel-bg-3: #492b0f;
+  --nivel-bg-4: #572222;
+  --nivel-faixa-1: #4081d2;
+  --nivel-faixa-2: #9dadbe;
+  --nivel-faixa-3: #f59e3b;
+  --nivel-faixa-4: #de4d52;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16191c;
+    --surface: #1e2226;
+    --surface-2: #262b30;
+    --border: #30363c;
+    --border-strong: #737b84;
+    --text: #eceef0;
+    --text-muted: #a3abb3;
+    --brand: #eceef0;
+    --brand-contrast: #16191c;
+    --accent: #ffc629;
+    --accent-ink: #14171a;
+    --hero: #0c0e10;
+    --hero-text: #ffffff;
+    --hero-muted: #c3c9cf;
+    --hero-line: #6b737b;
+    --campo: #1e2226;
+    --foto: #262b30;
+    --carro-corpo: #59626b;
+    --carro-traco: #9aa3ab;
+    --carro-vidro: #3a4148;
+    --carro-roda: #0f1113;
+    --carro-aro: #8a929a;
+    --nivel-1: #92c1fd;
+    --nivel-2: #b6c6d7;
+    --nivel-3: #fdb171;
+    --nivel-4: #fb9795;
+    --nivel-bg-1: #183356;
+    --nivel-bg-2: #262c33;
+    --nivel-bg-3: #492b0f;
+    --nivel-bg-4: #572222;
+    --nivel-faixa-1: #4081d2;
+    --nivel-faixa-2: #9dadbe;
+    --nivel-faixa-3: #f59e3b;
+    --nivel-faixa-4: #de4d52;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-forte: var(--border-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-brand: var(--brand);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-hero: var(--hero);
+  --color-hero-text: var(--hero-text);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-line: var(--hero-line);
+  --color-campo: var(--campo);
+  --color-foto: var(--foto);
+  --color-nivel-1: var(--nivel-1);
+  --color-nivel-2: var(--nivel-2);
+  --color-nivel-3: var(--nivel-3);
+  --color-nivel-4: var(--nivel-4);
+  --color-nivel-bg-1: var(--nivel-bg-1);
+  --color-nivel-bg-2: var(--nivel-bg-2);
+  --color-nivel-bg-3: var(--nivel-bg-3);
+  --color-nivel-bg-4: var(--nivel-bg-4);
+  --color-nivel-faixa-1: var(--nivel-faixa-1);
+  --color-nivel-faixa-2: var(--nivel-faixa-2);
+  --color-nivel-faixa-3: var(--nivel-faixa-3);
+  --color-nivel-faixa-4: var(--nivel-faixa-4);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.conteudo {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .conteudo {
+    padding-inline: 2rem;
+  }
+}
+
+a.link,
+.link {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.link:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+input[type="range"],
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--brand);
+}
+
+.hachura {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--text-muted) 60%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+dialog.folha[open] {
+  animation: subir 180ms ease-out;
+}
+
+dialog.folha::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.folha[open] {
+    animation: none;
+  }
+}
+
+.icone-lua {
+  display: none;
+}
+
+:root[data-theme="dark"] .icone-lua {
+  display: block;
+}
+
+:root[data-theme="dark"] .icone-sol {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .icone-lua {
+    display: block;
+  }
+
+  :root:not([data-theme="light"]) .icone-sol {
+    display: none;
+  }
+}
