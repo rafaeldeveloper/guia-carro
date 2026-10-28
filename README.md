@@ -14,6 +14,10 @@ npm test
 
 A leitura da proposta por foto (`/api/proposta/extrair`) usa o Claude Agent SDK e só funciona na versão local, com o Claude Code instalado e logado na máquina (`claude` → `/login`). Sem isso, o app avisa e o formulário manual continua funcionando.
 
+## Busca
+
+A busca da inicial e do Comparar roda toda no navegador (`src/lib/busca.ts`): várias palavras em qualquer ordem, sem acento, com correção de erro de digitação, ordem por relevância e autocomplete. Preço, tipo e equipamentos escritos na frase ("suv até 160 mil", "120k", "picape com couro") viram filtros. Sinônimos, apelidos de marca e atalhos do autocomplete ficam em `src/data/sinonimos.ts`.
+
 ## Publicação no GitHub Pages
 
 O workflow `.github/workflows/pages.yml` roda a cada push no `main` e uma vez por dia (para atualizar datas e promoções): `npm ci`, `npm test`, `npm run build` com `GITHUB_PAGES=true` e publica a pasta `out/`.

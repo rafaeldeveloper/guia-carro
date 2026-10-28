@@ -1,33 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Carro } from "@/data/carros";
+import { CampoBusca } from "@/components/CampoBusca";
 import { FotoCarro } from "@/components/FotoCarro";
 import { NotaForma, ReguaLinha } from "@/components/NotaRiscoSelo";
-import { lerFiltrosDaUrl, type ParametrosUrl } from "@/lib/filtrosUrl";
-import { formatarReais } from "@/lib/formato";
+import {
+  buscar,
+  equipamentos,
+  interpretar,
+  removerDaConsulta,
+  sugestoesProximas,
+  type ChaveFiltro,
+  type Equipamento,
+  type Tipo,
+} from "@/lib/busca";
+import { lerFiltrosDaUrl, urlEscrita, type ParametrosUrl } from "@/lib/filtrosUrl";
+import { formatarMilReais, formatarReais } from "@/lib/formato";
 
 type CarroBusca = Carro & { nota: number; incerto: boolean };
 
-type Equipamento = keyof Carro["equipamentos"];
+type Ordem = "relevancia" | "risco" | "preco";
 
-const equipamentos: { chave: Equipamento; rotulo: string }[] = [
-  { chave: "camera360", rotulo: "Câmera 360°" },
-  { chave: "couro", rotulo: "Banco de couro" },
-  { chave: "chavePresencial", rotulo: "Chave presencial" },
-  { chave: "freioEletronico", rotulo: "Freio de mão eletrônico" },
-  { chave: "inducao", rotulo: "Carregador por indução" },
-];
-
-type Ordem = "risco" | "preco";
-
-type Filtros = { orcamento: number; vaoMin: number; exigidos: Equipamento[]; tipos: string[] };
+type Filtros = { orcamento: number; vaoMin: number; exigidos: Equipamento[]; tipos: Tipo[] };
 
 type Limites = { precoMin: number; precoMax: number; vaoMax: number };
-
-const normalizar = (texto: string) =>
-  texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 function alternarItem<T>(lista: T[], item: T) {
   return lista.includes(item) ? lista.filter((i) => i !== item) : [...lista, item];
@@ -53,37 +52,94 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
   const [daUrl] = useState(() =>
     lerFiltrosDaUrl(parametros, { tipos: tipos.map((t) => t.tipo), precoMin: limites.precoMin, precoMax: limites.precoMax }),
   );
-  const [filtros, setFiltros] = useState<Filtros>({ ...inicial, orcamento: daUrl.orcamento, tipos: daUrl.tipos });
-  const [ordem, setOrdem] = useState<Ordem>("risco");
+  const [filtros, setFiltros] = useState<Filtros>(() => {
+    const daFrase = interpretar(daUrl.termo, carros);
+    return {
+      ...inicial,
+      orcamento: daFrase.orcamento !== null && daUrl.orcamento >= Math.min(daFrase.orcamento, limites.precoMax) ? limites.precoMax : daUrl.orcamento,
+      tipos: daUrl.tipos.filter((t) => !daFrase.tipos.includes(t)),
+      exigidos: daUrl.exigidos.filter((e) => !daFrase.exigidos.includes(e)),
+    };
+  });
+  const [ordemEscolhida, setOrdem] = useState<Ordem | null>(null);
   const [termo, setTermo] = useState(daUrl.termo);
   const folhaRef = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
+
+  const busca = useMemo(
+    () => buscar(termo, carros, { ...filtros, orcamento: filtros.orcamento < limites.precoMax ? filtros.orcamento : null }),
+    [carros, filtros, termo, limites.precoMax],
+  );
+  const { interpretacao } = busca;
+  const vistos: Filtros = {
+    orcamento: busca.filtros.orcamento ?? limites.precoMax,
+    vaoMin: filtros.vaoMin,
+    exigidos: busca.filtros.exigidos,
+    tipos: busca.filtros.tipos,
+  };
+  const temTexto = interpretacao.termos.length > 0;
+  const ordem: Ordem =
+    ordemEscolhida === "relevancia" && !temTexto ? "risco" : (ordemEscolhida ?? (temTexto ? "relevancia" : "risco"));
 
   const resultado = useMemo(
     () =>
-      carros
-        .filter((c) => normalizar(`${c.nome} ${c.tipo} ${c.motor} ${c.cambio}`).includes(normalizar(termo.trim())))
-        .filter((c) => c.preco <= filtros.orcamento)
-        .filter((c) => filtros.vaoMin === 0 || (c.vaoLivreMm ?? 0) >= filtros.vaoMin)
-        .filter((c) => filtros.exigidos.every((e) => c.equipamentos[e] === true))
-        .filter((c) => filtros.tipos.length === 0 || filtros.tipos.includes(c.tipo))
-        .sort((a, b) => (ordem === "risco" ? a.nota - b.nota : a.preco - b.preco)),
-    [carros, filtros, ordem, termo],
+      [...busca.itens]
+        .sort((a, b) =>
+          ordem === "relevancia"
+            ? b.pontos - a.pontos || a.carro.nota - b.carro.nota
+            : ordem === "risco"
+              ? a.carro.nota - b.carro.nota
+              : a.carro.preco - b.carro.preco,
+        )
+        .map((i) => i.carro),
+    [busca, ordem],
   );
 
-  const ativos = [
-    ...(filtros.orcamento < limites.precoMax
-      ? [{ id: "orcamento", rotulo: `Até ${formatarReais(filtros.orcamento)}`, remover: { orcamento: limites.precoMax } }]
+  const alterar = (novo: Partial<Filtros>) => {
+    const chaves: ChaveFiltro[] = [
+      ...(novo.orcamento !== undefined && interpretacao.orcamento !== null ? (["orcamento"] as const) : []),
+      ...interpretacao.tipos.filter((t) => novo.tipos && !novo.tipos.includes(t)).map((t) => `tipo:${t}` as const),
+      ...interpretacao.exigidos
+        .filter((e) => novo.exigidos && !novo.exigidos.includes(e))
+        .map((e) => `equip:${e}` as const),
+    ];
+    setTermo(chaves.reduce((t, chave) => removerDaConsulta(t, chave, carros), termo));
+    setFiltros((f) => ({
+      ...f,
+      ...novo,
+      ...(novo.tipos && { tipos: novo.tipos.filter((t) => !interpretacao.tipos.includes(t)) }),
+      ...(novo.exigidos && { exigidos: novo.exigidos.filter((e) => !interpretacao.exigidos.includes(e)) }),
+    }));
+  };
+
+  const ativos: { id: string; rotulo: string; remover: Partial<Filtros> }[] = [
+    ...(vistos.orcamento < limites.precoMax
+      ? [{ id: "orcamento", rotulo: `Até ${formatarMilReais(vistos.orcamento)}`, remover: { orcamento: limites.precoMax } }]
       : []),
-    ...(filtros.vaoMin > 0
-      ? [{ id: "vao", rotulo: `Vão livre ≥ ${filtros.vaoMin} mm`, remover: { vaoMin: 0 } }]
+    ...(vistos.vaoMin > 0
+      ? [{ id: "vao", rotulo: `Vão livre ≥ ${vistos.vaoMin} mm`, remover: { vaoMin: 0 } }]
       : []),
-    ...filtros.exigidos.map((e) => ({
+    ...vistos.exigidos.map((e) => ({
       id: e,
       rotulo: equipamentos.find((q) => q.chave === e)?.rotulo ?? e,
-      remover: { exigidos: filtros.exigidos.filter((x) => x !== e) },
+      remover: { exigidos: vistos.exigidos.filter((x) => x !== e) },
     })),
-    ...filtros.tipos.map((t) => ({ id: `tipo-${t}`, rotulo: t, remover: { tipos: filtros.tipos.filter((x) => x !== t) } })),
+    ...vistos.tipos.map((t) => ({ id: `tipo-${t}`, rotulo: t, remover: { tipos: vistos.tipos.filter((x) => x !== t) } })),
   ];
+
+  const tiposUrl = vistos.tipos.join(",");
+  const exigidosUrl = vistos.exigidos.join(",");
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (termo.trim()) p.set("q", termo.trim());
+    if (tiposUrl) p.set("tipo", tiposUrl);
+    if (vistos.orcamento < limites.precoMax) p.set("orcamento", String(vistos.orcamento));
+    if (exigidosUrl) p.set("equip", exigidosUrl);
+    const qs = p.toString();
+    if (qs === window.location.search.slice(1)) return;
+    urlEscrita.busca = qs;
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }, [termo, tiposUrl, exigidosUrl, vistos.orcamento, limites.precoMax]);
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 48rem)");
@@ -92,7 +148,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
     return () => desktop.removeEventListener("change", fechar);
   }, []);
 
-  const limpar = () => setFiltros(inicial);
+  const limpar = () => alterar({ orcamento: limites.precoMax, vaoMin: 0, exigidos: [], tipos: [] });
 
   return (
     <div className="grid gap-4">
@@ -111,13 +167,13 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
         <circle cx="7" cy="7" r="4.5" />
         <path d="m10.5 10.5 3.5 3.5" />
       </svg>
-      <input
+      <CampoBusca
         id="busca-carro"
-        type="search"
-        value={termo}
-        onChange={(e) => setTermo(e.target.value)}
-        placeholder="Buscar por modelo, marca, motor ou tipo"
-        autoComplete="off"
+        carros={carros}
+        valor={termo}
+        aoMudar={setTermo}
+        aoEscolher={(s) => (s.carroId ? router.push(`/carros/${s.carroId}`) : setTermo(s.consulta))}
+        placeholder="Buscar por modelo, marca, tipo, equipamento ou preço"
         className="w-full rounded-lg border border-line-forte bg-campo py-3 pr-3 pl-10 text-base placeholder:text-muted"
       />
     </div>
@@ -132,7 +188,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
               </button>
             )}
           </div>
-          <PainelFiltros filtros={filtros} setFiltros={setFiltros} limites={limites} tipos={tipos} />
+          <PainelFiltros filtros={vistos} alterar={alterar} limites={limites} tipos={tipos} />
         </div>
       </aside>
 
@@ -163,6 +219,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
             <div className="inline-flex rounded-full bg-surface-2 p-0.5">
               {(
                 [
+                  ...(temTexto ? ([["relevancia", "Relevância"]] as const) : []),
                   ["risco", "Menor risco"],
                   ["preco", "Menor preço"],
                 ] as const
@@ -192,7 +249,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
               <li key={a.id}>
                 <button
                   type="button"
-                  onClick={() => setFiltros((f) => ({ ...f, ...a.remover }))}
+                  onClick={() => alterar(a.remover)}
                   aria-label={`Remover filtro: ${a.rotulo}`}
                   className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-sm font-medium text-ink hover:bg-surface"
                 >
@@ -209,10 +266,28 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
           </ul>
         )}
 
+        {resultado.length > 0 && (interpretacao.consultaCorrigida || interpretacao.avisos.length > 0) && (
+          <div className="grid gap-1 text-sm text-muted" role="status">
+            {interpretacao.consultaCorrigida && (
+              <p>
+                Mostrando resultados para <strong className="font-semibold text-ink">{interpretacao.consultaCorrigida}</strong>
+              </p>
+            )}
+            {interpretacao.avisos.map((a) => (
+              <p key={a}>{a}</p>
+            ))}
+          </div>
+        )}
+
         {resultado.length === 0 ? (
-          <p className="rounded-lg bg-surface-2 p-6 text-sm">
-            Nenhum carro atende a todos os filtros. Tire um filtro acima ou aumente o orçamento.
-          </p>
+          <EstadoVazio
+            termo={termo.trim()}
+            comFiltros={ativos.length > 0}
+            proximas={sugestoesProximas(termo, carros)}
+            aoBuscar={setTermo}
+            aoLimparBusca={() => setTermo("")}
+            aoLimparFiltros={limpar}
+          />
         ) : (
           <div>
             <div className={`${grade} hidden border-b border-line pb-2 text-xs text-muted md:grid`} aria-hidden="true">
@@ -228,7 +303,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
             <ol>
               {resultado.map((c, i) => (
                 <li key={c.id}>
-                  <LinhaCarro carro={c} posicao={i + 1} filtros={filtros} />
+                  <LinhaCarro carro={c} posicao={i + 1} filtros={vistos} />
                 </li>
               ))}
             </ol>
@@ -264,7 +339,7 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
             </div>
           </div>
           <div className="overflow-y-auto px-4 py-4">
-            <PainelFiltros filtros={filtros} setFiltros={setFiltros} limites={limites} tipos={tipos} />
+            <PainelFiltros filtros={vistos} alterar={alterar} limites={limites} tipos={tipos} />
           </div>
           <div className="bg-surface-2 p-4">
             <button
@@ -282,16 +357,72 @@ export function Busca({ carros, parametros = {} }: { carros: CarroBusca[]; param
   );
 }
 
+function EstadoVazio({
+  termo,
+  comFiltros,
+  proximas,
+  aoBuscar,
+  aoLimparBusca,
+  aoLimparFiltros,
+}: {
+  termo: string;
+  comFiltros: boolean;
+  proximas: string[];
+  aoBuscar: (termo: string) => void;
+  aoLimparBusca: () => void;
+  aoLimparFiltros: () => void;
+}) {
+  if (!termo) {
+    return (
+      <p className="rounded-lg bg-surface-2 p-6 text-sm">
+        Nenhum carro atende a todos os filtros. Tire um filtro acima ou aumente o orçamento.
+      </p>
+    );
+  }
+  return (
+    <div className="grid gap-3 rounded-lg bg-surface-2 p-6 text-sm">
+      <p className="font-semibold">
+        Nenhum carro para “{termo}”{comFiltros && " com os filtros escolhidos"}.
+      </p>
+      {proximas.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted">Talvez você procure:</span>
+          {proximas.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => aoBuscar(p)}
+              className="rounded-full bg-surface px-3 py-1 font-medium text-ink ring-1 ring-line hover:bg-bg"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-4">
+        <button type="button" onClick={aoLimparBusca} className="text-brand underline underline-offset-4">
+          Limpar busca
+        </button>
+        {comFiltros && (
+          <button type="button" onClick={aoLimparFiltros} className="text-brand underline underline-offset-4">
+            Limpar filtros
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PainelFiltros({
   filtros,
-  setFiltros,
+  alterar,
   limites,
   tipos,
 }: {
   filtros: Filtros;
-  setFiltros: React.Dispatch<React.SetStateAction<Filtros>>;
+  alterar: (novo: Partial<Filtros>) => void;
   limites: Limites;
-  tipos: { tipo: string; total: number }[];
+  tipos: { tipo: Tipo; total: number }[];
 }) {
   const id = useId();
   return (
@@ -309,7 +440,7 @@ function PainelFiltros({
                   type="checkbox"
                   className="sr-only"
                   checked={filtros.tipos.includes(tipo)}
-                  onChange={() => setFiltros((f) => ({ ...f, tipos: alternarItem(f.tipos, tipo) }))}
+                  onChange={() => alterar({ tipos: alternarItem(filtros.tipos, tipo) })}
                 />
                 {tipo} <span className="opacity-70">({total})</span>
               </label>
@@ -329,7 +460,7 @@ function PainelFiltros({
           max={limites.precoMax}
           step={1000}
           value={filtros.orcamento}
-          onChange={(e) => setFiltros((f) => ({ ...f, orcamento: Number(e.target.value) }))}
+          onChange={(e) => alterar({ orcamento: Number(e.target.value) })}
         />
       </div>
       <div className="grid gap-1.5">
@@ -344,7 +475,7 @@ function PainelFiltros({
           max={limites.vaoMax}
           step={5}
           value={filtros.vaoMin}
-          onChange={(e) => setFiltros((f) => ({ ...f, vaoMin: Number(e.target.value) }))}
+          onChange={(e) => alterar({ vaoMin: Number(e.target.value) })}
         />
       </div>
       <fieldset className="grid gap-2">
@@ -355,7 +486,7 @@ function PainelFiltros({
               type="checkbox"
               className="size-4"
               checked={filtros.exigidos.includes(chave)}
-              onChange={() => setFiltros((f) => ({ ...f, exigidos: alternarItem(f.exigidos, chave) }))}
+              onChange={() => alterar({ exigidos: alternarItem(filtros.exigidos, chave) })}
             />
             {rotulo}
           </label>

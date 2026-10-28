@@ -5,7 +5,7 @@ const opcoes = { tipos: ["Hatch", "Picape", "SUV", "Sedã"] as Tipo[], precoMin:
 
 describe("lerFiltrosDaUrl", () => {
   it("sem parâmetros devolve busca vazia, sem tipo e orçamento no máximo", () => {
-    expect(lerFiltrosDaUrl({}, opcoes)).toEqual({ termo: "", tipos: [], orcamento: 320000 });
+    expect(lerFiltrosDaUrl({}, opcoes)).toEqual({ termo: "", tipos: [], orcamento: 320000, exigidos: [] });
   });
 
   it("lê termo, tipo e orçamento", () => {
@@ -13,6 +13,7 @@ describe("lerFiltrosDaUrl", () => {
       termo: "creta",
       tipos: ["SUV"],
       orcamento: 160000,
+      exigidos: [],
     });
   });
 
@@ -31,6 +32,10 @@ describe("lerFiltrosDaUrl", () => {
     expect(lerFiltrosDaUrl({ orcamento: "-1" }, opcoes).orcamento).toBe(320000);
   });
 
+  it("lê equipamentos exigidos e ignora os desconhecidos", () => {
+    expect(lerFiltrosDaUrl({ equip: "couro,camera360,teto" }, opcoes).exigidos).toEqual(["camera360", "couro"]);
+  });
+
   it("usa só o primeiro termo quando q vem repetido", () => {
     expect(lerFiltrosDaUrl({ q: ["polo", "onix"] }, opcoes).termo).toBe("polo");
   });
@@ -46,6 +51,6 @@ describe("urlComparar", () => {
   it("a URL montada é lida de volta pelos mesmos filtros", () => {
     const url = new URL(urlComparar({ q: "t200", tipo: "Sedã", orcamento: 150000 }), "http://x");
     const parametros = Object.fromEntries(url.searchParams);
-    expect(lerFiltrosDaUrl(parametros, opcoes)).toEqual({ termo: "t200", tipos: ["Sedã"], orcamento: 150000 });
+    expect(lerFiltrosDaUrl(parametros, opcoes)).toEqual({ termo: "t200", tipos: ["Sedã"], orcamento: 150000, exigidos: [] });
   });
 });

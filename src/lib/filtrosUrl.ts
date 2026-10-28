@@ -1,10 +1,13 @@
 import type { Carro } from "@/data/carros";
+import { equipamentos, type Equipamento } from "@/lib/busca";
 
 export type Tipo = Carro["tipo"];
 
 export type ParametrosUrl = Record<string, string | string[] | undefined>;
 
-export type FiltrosUrl = { termo: string; tipos: Tipo[]; orcamento: number };
+export type FiltrosUrl = { termo: string; tipos: Tipo[]; orcamento: number; exigidos: Equipamento[] };
+
+export const urlEscrita = { busca: "" };
 
 const normalizar = (texto: string) =>
   texto.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
@@ -20,7 +23,9 @@ export function lerFiltrosDaUrl(
   const tiposLidos = tipos.filter((t) => pedidos.includes(normalizar(t)));
   const numero = Number(valores(parametros.orcamento)[0]);
   const orcamento = Number.isFinite(numero) && numero > 0 ? Math.min(Math.max(numero, precoMin), precoMax) : precoMax;
-  return { termo, tipos: tiposLidos, orcamento };
+  const equip = valores(parametros.equip).flatMap((e) => e.split(","));
+  const exigidos = equipamentos.map((e) => e.chave).filter((e) => equip.includes(e));
+  return { termo, tipos: tiposLidos, orcamento, exigidos };
 }
 
 export function urlComparar({ q, tipo, orcamento }: { q?: string; tipo?: Tipo; orcamento?: number }) {

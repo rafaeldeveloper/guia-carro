@@ -1,5 +1,5 @@
-import Form from "next/form";
 import Link from "next/link";
+import { BuscaInicio } from "@/components/BuscaInicio";
 import { CartaoCarro, type CarroVitrine } from "@/components/CartaoCarro";
 import { MeAjude } from "@/components/MeAjude";
 import { carros } from "@/data/carros";
@@ -65,26 +65,18 @@ export default function Inicio() {
           <p className="mt-2 text-hero-muted">
             Nota de risco de {carros.length} carros 0 km, a partir das reclamações por 1.000 vendidos.
           </p>
-          <Form action="/comparar" role="search" className="mt-5 flex max-w-[820px] gap-1.5 rounded-xl bg-campo p-1.5 ring-1 ring-hero-line">
-            <label htmlFor="busca-inicio" className="sr-only">
-              Buscar carro
-            </label>
-            <svg viewBox="0 0 16 16" aria-hidden="true" className="ml-2.5 size-4 shrink-0 self-center text-muted" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="7" cy="7" r="4.5" />
-              <path d="m10.5 10.5 3.5 3.5" />
-            </svg>
-            <input
-              id="busca-inicio"
-              name="q"
-              type="search"
-              autoComplete="off"
-              placeholder="Busque por marca, modelo ou motor"
-              className="min-w-0 flex-1 bg-transparent px-1.5 py-2.5 text-base text-ink placeholder:text-muted focus-visible:outline-none"
-            />
-            <button type="submit" className="rounded-lg bg-accent px-5 font-bold text-accent-ink md:px-7">
-              Buscar
-            </button>
-          </Form>
+          <BuscaInicio
+            carros={carros.map(({ id, nome, tipo, preco, motor, cambio, equipamentos, vaoLivreMm }) => ({
+              id,
+              nome,
+              tipo,
+              preco,
+              motor,
+              cambio,
+              equipamentos,
+              vaoLivreMm,
+            }))}
+          />
           <ul className="mt-4 flex flex-wrap gap-2" aria-label="Atalhos">
             {atalhos.map((a) => (
               <li key={a.rotulo}>
