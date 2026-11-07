@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Guia do Carro",
+  title: "Meu Guia do Carro",
   description: "Busca de carros com nota de risco por defeitos, proporcional às vendas",
 };
 
@@ -36,7 +36,7 @@ export default function RootLayout({
               <span aria-hidden="true" className="grid size-6 place-items-center rounded bg-accent text-sm text-accent-ink">
                 G
               </span>
-              Guia do Carro
+              Meu Guia do Carro
             </Link>
             <div className="flex items-center gap-1 md:order-last md:ml-auto">
               <Link href="/como-calculamos" className="px-2 py-1 text-sm text-muted hover:text-ink">

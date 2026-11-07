@@ -1,7 +1,7 @@
 import { MinhaFicha } from "@/components/MinhaFicha";
 import { Topo } from "@/components/Topo";
 
-export const metadata = { title: "Minha ficha · Guia do Carro" };
+export const metadata = { title: "Minha ficha · Meu Guia do Carro" };
 
 export default function PaginaMinhaFicha() {
   return (

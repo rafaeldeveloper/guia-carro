@@ -1,8 +1,11 @@
-# Guia do Carro
+# Meu Guia do Carro
 
 Compara carros 0 km pela nota de risco (reclamações por 1.000 vendidos), mostra o preço justo de cada um, calcula o juro escondido numa proposta de financiamento e acompanha o carro que você comprou (FIPE, revisão, garantia). Os dados da ficha ficam só no navegador.
 
-Site público: https://rafaeldeveloper.github.io/guia-carro/
+Site público: https://rafaeldeveloper.github.io/meu-guia-carro/
+
+carros em atualização
+
 
 ## Rodar local
 
@@ -22,10 +25,10 @@ A busca da inicial e do Comparar roda toda no navegador (`src/lib/busca.ts`): v�
 
 O workflow `.github/workflows/pages.yml` roda a cada push no `main` e uma vez por dia (para atualizar datas e promoções): `npm ci`, `npm test`, `npm run build` com `GITHUB_PAGES=true` e publica a pasta `out/`.
 
-Com `GITHUB_PAGES=true` o Next gera um site estático (`output: "export"`) em `/guia-carro`:
+Com `GITHUB_PAGES=true` o Next gera um site estático (`output: "export"`) em `/meu-guia-carro`:
 
 - a rota de leitura por foto fica fora do build e os botões de foto somem da página de proposta;
 - a FIPE da Minha ficha é buscada direto do navegador em fipe.parallelum.com.br, com cache de 24 h;
 - o preço justo da página de cada carro usa a data do build.
 
-Para testar o build estático: `GITHUB_PAGES=true npm run build` e sirva `out/` sob o caminho `/guia-carro/`.
+Para testar o build estático: `GITHUB_PAGES=true npm run build` e sirva `out/` sob o caminho `/meu-guia-carro/`.

@@ -56,7 +56,7 @@ export async function buscarFipe(carroId: string, anoModelo: number): Promise<Re
   const codigo = codigoFipe(carroId, anoModelo);
   if (!codigo) return { erro: "Carro sem código FIPE mapeado." };
 
-  const chave = `guia-carro:fipe:${codigo}:${anoModelo}`;
+  const chave = `meu-guia-carro:fipe:${codigo}:${anoModelo}`;
   const guardado = lerCache(chave);
   if (guardado) return guardado;
 

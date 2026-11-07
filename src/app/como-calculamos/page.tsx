@@ -1,7 +1,7 @@
 import { IconeRisco, ReguaRisco } from "@/components/NotaRiscoSelo";
 import { Topo } from "@/components/Topo";
 
-export const metadata = { title: "Como calculamos · Guia do Carro" };
+export const metadata = { title: "Como calculamos · Meu Guia do Carro" };
 
 const faixas = [
   { nivel: 1, rotulo: "Risco baixo", de: "abaixo de 4" },

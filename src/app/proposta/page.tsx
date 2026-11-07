@@ -1,7 +1,7 @@
 import { AnaliseDeProposta } from "@/components/AnaliseDeProposta";
 import { Topo } from "@/components/Topo";
 
-export const metadata = { title: "Proposta e pagamento · Guia do Carro" };
+export const metadata = { title: "Proposta e pagamento · Meu Guia do Carro" };
 
 export default function PaginaProposta() {
   return (

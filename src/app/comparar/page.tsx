@@ -6,7 +6,7 @@ import { carros } from "@/data/carros";
 import { temIncerteza } from "@/lib/apresentacao";
 import { calcularRisco } from "@/lib/risco";
 
-export const metadata = { title: "Comparar · Guia do Carro" };
+export const metadata = { title: "Comparar · Meu Guia do Carro" };
 
 export default function Comparar() {
   const carrosComNota = carros.map((c) => ({ ...c, nota: calcularRisco(c).nota, incerto: temIncerteza(c) }));

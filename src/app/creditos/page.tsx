@@ -4,7 +4,7 @@ import { Topo } from "@/components/Topo";
 import { carros } from "@/data/carros";
 import { fotos } from "@/data/fotos";
 
-export const metadata = { title: "Créditos das fotos · Guia do Carro" };
+export const metadata = { title: "Créditos das fotos · Meu Guia do Carro" };
 
 export default function Creditos() {
   const comFoto = carros.filter((c) => c.foto && fotos[c.id]);
