@@ -1,4 +1,4 @@
-# Meu Guia do Carro aqui só tem carro barato
+# Meu Guia do Carro aqui só tem carro barato e legal
 
 Compara carros 0 km pela nota de risco (reclamações por 1.000 vendidos), mostra o preço justo de cada um, calcula o juro escondido numa proposta de financiamento e acompanha o carro que você comprou (FIPE, revisão, garantia). Os dados da ficha ficam só no navegador.
 
