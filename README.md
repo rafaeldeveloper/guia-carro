@@ -4,9 +4,6 @@ Compara carros 0 km pela nota de risco (reclamações por 1.000 vendidos), mostr
 
 Site público: https://rafaeldeveloper.github.io/meu-guia-carro/
 
-carros em atualização
-
-
 ## Rodar local
 
 ```bash
